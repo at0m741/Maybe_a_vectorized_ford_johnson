@@ -1,6 +1,6 @@
 # Maybe_a_vectorized_ford_johnson
 ```bash
-c++ FJmerge.cpp -mavx2  -msse2 -std=c++98 -D DEBUG
+c++ FJmerge.cpp -mavx2  -msse2 -std=c++98 -D DEBUG -Og -Oz -O3
 ```
 # example :
 ```bash
