@@ -15,7 +15,8 @@ align static const uint64_t jacobsthal_table[] =
 		1537228672809129301, 3074457345618258603, 6148914691236517205
 };
 
-void calculate_jacobsthal_avx(std::vector<uint64_t>& jacobsthal, size_t start, size_t size) 
+__attribute__((always_inline))
+inline  void calculate_jacobsthal_avx(std::vector<uint64_t>& jacobsthal, size_t start, size_t size) 
 {
     if (start < 2) return;
     uint64_t* aligned_ptr = reinterpret_cast<uint64_t*>(check_alignment(&jacobsthal[start], 32));

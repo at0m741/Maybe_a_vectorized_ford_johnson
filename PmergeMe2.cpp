@@ -1,5 +1,37 @@
 #include "PmergeMe.hpp"
 
+int partition_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right);
+
+//avx_swap
+
+
+void quicksort_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
+{
+    if (left < right) 
+    {
+        int pivotIndex = partition_pairs(pairs, left, right);
+        quicksort_pairs(pairs, left, pivotIndex - 1);
+        quicksort_pairs(pairs, pivotIndex + 1, right);
+    }
+}
+
+int partition_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
+{
+    std::pair<int, int> pivot = pairs[right];
+    int i = left - 1;
+
+    for (int j = left; j < right; ++j) 
+    {
+        if (ComparePairs()(pairs[j], pivot)) 
+        {
+            ++i;
+            std::swap(pairs[i], pairs[j]);
+        }
+    }
+    std::swap(pairs[i + 1], pairs[right]);
+    return i + 1;
+}
+
 std::deque<int>& ford_johnson_sort_deque(std::deque<int>& arr) 
 {
     int n = arr.size();
@@ -17,7 +49,7 @@ std::deque<int>& ford_johnson_sort_deque(std::deque<int>& arr)
         pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
 
     compare_pairs_avx_deque(pairs);
-    std::sort(pairs.begin(), pairs.end(), ComparePairs());
+	quicksort_pairs(pairs, 0, pairs.size() - 1);
     std::deque<int> S;
     std::deque<int> pend;
 

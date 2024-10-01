@@ -2,7 +2,7 @@ NAME = PmergeMe
 
 CC = c++
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -march=native -mavx2  
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -march=native -mavx2 
 
 SRC = main.cpp \
 	  Jacobsthal.cpp \
@@ -24,6 +24,9 @@ ifeq ($(AVX512), 1)
 endif
 
 all: $(NAME)
+
+opti: CFLAGS += -O3 -mtune=native
+opti: re
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)

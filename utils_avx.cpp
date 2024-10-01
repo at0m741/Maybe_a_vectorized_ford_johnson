@@ -1,6 +1,5 @@
 #include "PmergeMe.hpp"
 
-
 void unalign(void* ptr)
 {
 	uint64_t sym = SYM;
@@ -17,8 +16,7 @@ void unalign(void* ptr)
     );
 }
 
-
- void check_and_print_alignment(void* ptr, std::size_t alignment) 
+void check_and_print_alignment(void* ptr, std::size_t alignment) 
 {
     uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
     
@@ -42,10 +40,7 @@ void* check_alignment(void* ptr, std::size_t alignment)
         uintptr_t offset = alignment - (addr & (alignment - 1));
         std::cout << "align over " << offset << " bytes" << std::endl;
         void* new_ptr = NULL;
-        int res = posix_memalign(&new_ptr, alignment, 1024); 
-        if (res != 0) 
-            return NULL;
-
+       
         std::cout << "new aligned address: " << new_ptr << std::endl;
         std::cout << "old address: " << ptr << std::endl;
 
