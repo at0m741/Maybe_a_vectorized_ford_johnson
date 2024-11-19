@@ -37,19 +37,11 @@ void* check_alignment(void* ptr, std::size_t alignment)
     
     if ((addr & (alignment - 1)) != 0) 
     {
-        uintptr_t offset = alignment - (addr & (alignment - 1));
-        std::cout << "align over " << offset << " bytes" << std::endl;
         void* new_ptr = NULL;
-       
-        std::cout << "new aligned address: " << new_ptr << std::endl;
-        std::cout << "old address: " << ptr << std::endl;
-
         return new_ptr;
     } 
     else 
-    {
         std::cout << "alignment not needed" << std::endl;
-    }
 
     return ptr;
 }

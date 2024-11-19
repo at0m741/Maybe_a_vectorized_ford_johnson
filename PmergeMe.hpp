@@ -15,6 +15,7 @@
 #define align	__attribute__((aligned(32)))
 #define SYM		0x0000000065657266
 
+
 struct ComparePairs 
 {
     bool operator()(const std::pair<int, int>& a, const std::pair<int, int>& b) const 

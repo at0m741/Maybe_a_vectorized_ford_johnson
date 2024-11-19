@@ -5,13 +5,13 @@ int partition_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right
 //avx_swap
 
 
-void quicksort_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
+void sort_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
 {
     if (left < right) 
     {
         int pivotIndex = partition_pairs(pairs, left, right);
-        quicksort_pairs(pairs, left, pivotIndex - 1);
-        quicksort_pairs(pairs, pivotIndex + 1, right);
+        sort_pairs(pairs, left, pivotIndex - 1);
+        sort_pairs(pairs, pivotIndex + 1, right);
     }
 }
 
@@ -49,7 +49,7 @@ std::deque<int>& ford_johnson_sort_deque(std::deque<int>& arr)
         pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
 
     compare_pairs_avx_deque(pairs);
-	quicksort_pairs(pairs, 0, pairs.size() - 1);
+	sort_pairs(pairs, 0, pairs.size() - 1);
     std::deque<int> S;
     std::deque<int> pend;
 

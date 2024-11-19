@@ -1,34 +1,63 @@
 #include "PmergeMe.hpp"
 
 
-
-int partition_pairs(std::vector<std::pair<int, int> >& pairs, int left, int right); 
-void quicksort_pairs(std::vector<std::pair<int, int> >& pairs, int left, int right) 
+void merge_pairs(std::vector<std::pair<int, int> >& pairs, int left, int middle, int right) 
 {
-    if (left < right) 
+    int n1 = middle - left + 1;
+    int n2 = right - middle;
+
+    std::vector<std::pair<int, int> > leftArray(n1);
+    std::vector<std::pair<int, int> > rightArray(n2);
+	leftArray.reserve(n1);
+	rightArray.reserve(n2);
+    for (int i = 0; i < n1; ++i)
+        leftArray[i] = pairs[left + i];
+    for (int j = 0; j < n2; ++j)
+        rightArray[j] = pairs[middle + 1 + j];
+
+    int i = 0, j = 0, k = left;
+
+    while (i < n1 && j < n2) 
     {
-        int pivotIndex = partition_pairs(pairs, left, right);
-        quicksort_pairs(pairs, left, pivotIndex - 1);
-        quicksort_pairs(pairs, pivotIndex + 1, right);
+        if (ComparePairs()(leftArray[i], rightArray[j])) 
+        {
+            pairs[k] = leftArray[i];
+            ++i;
+        } 
+        else 
+        {
+            pairs[k] = rightArray[j];
+            ++j;
+        }
+        ++k;
+    }
+
+    while (i < n1) 
+    {
+        pairs[k] = leftArray[i];
+        ++i;
+        ++k;
+    }
+
+    while (j < n2) 
+    {
+        pairs[k] = rightArray[j];
+        ++j;
+        ++k;
     }
 }
 
-int partition_pairs(std::vector<std::pair<int, int> >& pairs, int left, int right) 
+void sort_pairs(std::vector<std::pair<int, int> >& pairs, int left, int right) 
 {
-    std::pair<int, int> pivot = pairs[right];
-    int i = left - 1;
-
-    for (int j = left; j < right; ++j) 
+    if (left < right) 
     {
-        if (ComparePairs()(pairs[j], pivot)) 
-        {
-            ++i;
-            std::swap(pairs[i], pairs[j]);
-        }
-    }
+        int middle = left + (right - left) / 2;
 
-    std::swap(pairs[i + 1], pairs[right]);
-    return i + 1;
+        sort_pairs(pairs, left, middle);
+        sort_pairs(pairs, middle + 1, right);
+
+        merge_pairs(pairs, left, middle, right);
+    }
 }
 
 std::vector<int>& ford_johnson_sort(std::vector<int>& arr) 
@@ -48,7 +77,7 @@ std::vector<int>& ford_johnson_sort(std::vector<int>& arr)
         pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
 
     compare_pairs_avx(pairs);
-	quicksort_pairs(pairs, 0, pairs.size() - 1);
+	sort_pairs(pairs, 0, pairs.size() - 1);
     std::vector<int> S;
     std::vector<int> pend;
     S.reserve(pairs.size());

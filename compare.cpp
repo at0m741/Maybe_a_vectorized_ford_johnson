@@ -1,16 +1,17 @@
 #include "PmergeMe.hpp"
+#include <cstring>
+
 
 void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs) 
 {
 	size_t n = pairs.size();
     check_alignment(&pairs[0], 32);
-    size_t block_size = 64;  // Tile size: number of bytes that fit into a cache line
-
+    size_t block_size = 64;  
     for (size_t block_start = 0; block_start < n; block_start += block_size) 
     {
         size_t block_end = std::min(block_start + block_size, n);
         size_t i = block_start;
-
+		#pragma unroll(8)
         for (; i + 8 <= block_end; i += 8) 
         {
             if (i + 8 < block_end)
@@ -37,7 +38,6 @@ void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs)
             }
         }
 
-        // Handle the remaining elements in the block
         for (; i < block_end; ++i) 
         {
             int min_value = std::min(pairs[i].first, pairs[i].second);
@@ -50,26 +50,27 @@ void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs)
 
 
 
+
 void insertion(std::vector<int>& arr, int value) 
 {
     int left = 0;
     int right = arr.size() - 1;
     int pos = arr.size();
-
-    while (left <= right)
+	
+    while (left <= right) 
     {
-        int mid = left + (right - left) / 2;
-
-        if (arr[mid] < value) 
+        int mid = left + ((right - left) >> 1);
+        __builtin_prefetch(&arr[(mid + 1 + right) / 2], 0, 1); // Précharge pour le cas où `value > arr[mid]`
+        __builtin_prefetch(&arr[(left + mid - 1) / 2], 0, 1);
+        if (arr[mid] < value) {
             left = mid + 1;
-        else 
-        {
+        } else {
             pos = mid;
             right = mid - 1;
         }
     }
 
-    arr.insert(arr.begin() + pos, value); 
+    arr.push_back(0); 
+    std::memmove(&arr[pos + 1], &arr[pos], (arr.size() - pos - 1) * sizeof(int));
+    arr[pos] = value;
 }
-
-
