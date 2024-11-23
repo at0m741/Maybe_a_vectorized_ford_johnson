@@ -15,7 +15,6 @@
 #define align	__attribute__((aligned(32)))
 #define SYM		0x0000000065657266
 
-
 struct ComparePairs 
 {
     bool operator()(const std::pair<int, int>& a, const std::pair<int, int>& b) const 
@@ -33,7 +32,7 @@ void check_if_sorted(const std::vector<int>& arr);
 std::vector<uint64_t> generate_jacobsthal_AVX(size_t size);
 void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs);
 void insertion(std::vector<int>& arr, int value);
-std::vector<int>& ford_johnson_sort(std::vector<int>& arr);
+std::vector<int> ford_johnson_sort(std::vector<std::pair<int, int> >& pairs, int straggler, bool has_straggler) ;
 
 
 void insertion_deque(std::deque<int>& arr, int value);

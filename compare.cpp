@@ -5,7 +5,6 @@
 void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs) 
 {
 	size_t n = pairs.size();
-    check_alignment(&pairs[0], 32);
     size_t block_size = 64;  
     for (size_t block_start = 0; block_start < n; block_start += block_size) 
     {
@@ -14,9 +13,6 @@ void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs)
 		#pragma unroll(8)
         for (; i + 8 <= block_end; i += 8) 
         {
-            if (i + 8 < block_end)
-                _mm_prefetch((const char*)&pairs[i + 8], _MM_HINT_T0);
-
             __m256i first = _mm256_set_epi32(
                 pairs[i + 7].first, pairs[i + 6].first, pairs[i + 5].first, pairs[i + 4].first,
                 pairs[i + 3].first, pairs[i + 2].first, pairs[i + 1].first, pairs[i + 0].first);
@@ -28,11 +24,9 @@ void compare_pairs_avx(std::vector<std::pair<int, int> >& pairs)
             int results_min[8], results_max[8];
             _mm256_storeu_si256((__m256i*)results_min, min_values);
             _mm256_storeu_si256((__m256i*)results_max, max_values);
-
+			#pragma unroll(8)
             for (int j = 0; j < 8; ++j) 
             {
-                if (i + j + 8 < block_end)
-                    _mm_prefetch((const char*)&pairs[i + j + 8], _MM_HINT_T0);
                 pairs[i + j].first = results_min[j];
                 pairs[i + j].second = results_max[j];
             }
@@ -60,8 +54,6 @@ void insertion(std::vector<int>& arr, int value)
     while (left <= right) 
     {
         int mid = left + ((right - left) >> 1);
-        __builtin_prefetch(&arr[(mid + 1 + right) / 2], 0, 1); // Précharge pour le cas où `value > arr[mid]`
-        __builtin_prefetch(&arr[(left + mid - 1) / 2], 0, 1);
         if (arr[mid] < value) {
             left = mid + 1;
         } else {

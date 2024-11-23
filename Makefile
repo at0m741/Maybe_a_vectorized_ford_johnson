@@ -15,8 +15,8 @@ SRC = main.cpp \
 
 OBJ = $(SRC:.cpp=.o)
 
-ifeq ($(DEBUG), 1)
-	CFLAGS += -g
+ifeq ($(DEBUG), true)
+	CFLAGS += -g -D DEBUG
 endif
 
 ifeq ($(AVX512), 1)
