@@ -7,13 +7,14 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98 -march=native -mavx2
 SRC = main.cpp \
 	  Jacobsthal.cpp \
 	  PmergeMe.cpp \
-	  utils_avx.cpp	\
+	  utils.cpp	\
 	  compare.cpp \
 	  compare2.cpp \
 	  PmergeMe2.cpp \
 	  Jacobsthal2.cpp \
 
-OBJ = $(SRC:.cpp=.o)
+OBJ_DIR = obj
+OBJ = $(addprefix $(OBJ_DIR)/, $(SRC:.cpp=.o))
 
 ifeq ($(DEBUG), true)
 	CFLAGS += -g -D DEBUG
@@ -31,11 +32,12 @@ opti: re
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o $(NAME)
 
-%.o: %.cpp
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ)
+	rm -rf $(OBJ_DIR)
 
 fclean: clean
 	rm -f $(NAME)

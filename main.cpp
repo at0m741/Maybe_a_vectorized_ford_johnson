@@ -1,11 +1,13 @@
 #include "PmergeMe.hpp"
 
+#include "PmergeMe.hpp"
+
 int main(int argc, char* argv[]) 
 {
     std::vector<int> data;
     std::deque<int> data2;
 
-    if (argc <= 2) 
+    if (argc <= 2 || !std::isdigit(argv[1][0]) || !std::isdigit(argv[2][0]))
     {
         std::cout << "Usage: " << argv[0] << " <number1> <number2> ... <numberN>" << std::endl;
         std::cout << " " << std::endl;
@@ -22,15 +24,14 @@ int main(int argc, char* argv[])
             return 0;
         }
         data.push_back(std::atoi(argument.c_str()));
+        data2.push_back(std::atoi(argument.c_str()));
     }
 
-    if (data.empty()) 
+    if (data.empty() || data2.empty()) 
     {
         std::cout << "Nothing to sort" << std::endl;
         return 0;
     }
-
-    data2.insert(data2.begin(), data.begin(), data.end());
 
     int n = data.size();
     int straggler = -1;
@@ -41,6 +42,7 @@ int main(int argc, char* argv[])
         has_straggler = true;
         straggler = data.back();
         data.pop_back();
+        data2.pop_back();
         n--;
     }
 
@@ -48,6 +50,10 @@ int main(int argc, char* argv[])
     pairs.reserve(n / 2);
     for (int i = 0; i < n; i += 2)
         pairs.push_back(std::make_pair(data[i], data[i + 1]));
+
+    std::deque<std::pair<int, int> > deque_pairs;
+    for (int i = 0; i < n; i += 2)
+        deque_pairs.push_back(std::make_pair(data2[i], data2[i + 1]));
 
     std::cout << "Before :";
     for (size_t i = 0; i < data2.size(); ++i)
@@ -60,17 +66,17 @@ int main(int argc, char* argv[])
     double time1 = (double)(end - start) * 1000000.0 / CLOCKS_PER_SEC;  
 
     start = std::clock();
-    ford_johnson_sort_deque(data2);
+    std::deque<int> sorted_deque = ford_johnson_sort_deque(deque_pairs, straggler, has_straggler);
     end = std::clock();
     double time2 = (double)(end - start) * 1000000.0 / CLOCKS_PER_SEC; 
 
-    std::cout << "After  :";
+    std::cout << "After :";
     for (size_t i = 0; i < sorted_data.size(); ++i)
         std::cout << " " << sorted_data[i];
     std::cout << "\n";
 
     check_if_sorted(sorted_data);
-    check_if_sorted_deque(data2);
+    check_if_sorted_deque(sorted_deque);
 
     std::cout << "Time for first sort (vector): " << time1 << " us" << std::endl;
     std::cout << "Time for second sort (deque): " << time2 << " us" << std::endl;

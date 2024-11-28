@@ -23,7 +23,7 @@ inline void calculate_jacobsthal_avx(std::vector<uint64_t>& jacobsthal, size_t s
     uint64_t prev2 = jacobsthal[start - 2];
     uint64_t prev1 = jacobsthal[start - 1];
     size_t i = start;
-
+	jacobsthal.reserve(size);
     for (; i + 4 <= size; i += 4) 
     {
         __m256i prev1_vec = _mm256_set1_epi64x(prev1);

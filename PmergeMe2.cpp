@@ -1,53 +1,82 @@
 #include "PmergeMe.hpp"
 
-int partition_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right);
+__attribute__((always_inline, cold))
+static inline void copy_pairs(const std::deque<std::pair<int, int> >& pairs,
+                                   std::deque<std::pair<int, int> >& leftArray,
+                                   std::deque<std::pair<int, int> >& rightArray,
+                                   int left, int middle, int n1, int n2) 
+{
+    for (int i = 0; i < n1; ++i) {
+        leftArray[i] = pairs[left + i];
+    }
 
-//avx_swap
+    for (int j = 0; j < n2; ++j) {
+        rightArray[j] = pairs[middle + 1 + j];
+    }
+}
 
+__attribute__((flatten))
+void merge_pairs(std::deque<std::pair<int, int> >& pairs, int left, int middle, int right) 
+{
+    int n1 = middle - left + 1;
+    int n2 = right - middle;
+
+    std::deque<std::pair<int, int> > leftArray(n1);
+    std::deque<std::pair<int, int> > rightArray(n2);
+	leftArray.resize(n1);
+	rightArray.resize(n2);
+
+    copy_pairs(pairs, leftArray, rightArray, left, middle, n1, n2);
+
+    int i = 0, j = 0, k = left;
+
+    while (i < n1 && j < n2) 
+    {
+        if (ComparePairs()(leftArray[i], rightArray[j])) 
+        {
+            pairs[k] = leftArray[i];
+            ++i;
+        } 
+        else 
+        {
+            pairs[k] = rightArray[j];
+            ++j;
+        }
+        ++k;
+    }
+
+    while (i < n1) 
+    {
+        pairs[k] = leftArray[i];
+        ++i;
+        ++k;
+    }
+
+    while (j < n2) 
+    {
+        pairs[k] = rightArray[j];
+        ++j;
+        ++k;
+    }
+}
 
 void sort_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
 {
-    if (left < right) 
+    if (__builtin_expect(left < right, 1)) 
     {
-        int pivotIndex = partition_pairs(pairs, left, right);
-        sort_pairs(pairs, left, pivotIndex - 1);
-        sort_pairs(pairs, pivotIndex + 1, right);
+		int middle = left + ((right - left) >> 1);
+
+        sort_pairs(pairs, left, middle);
+        sort_pairs(pairs, middle + 1, right);
+
+        merge_pairs(pairs, left, middle, right);
     }
 }
 
-int partition_pairs(std::deque<std::pair<int, int> >& pairs, int left, int right) 
+
+
+std::deque<int> ford_johnson_sort_deque(std::deque<std::pair<int, int> >& pairs, int straggler, bool has_straggler) 
 {
-    std::pair<int, int> pivot = pairs[right];
-    int i = left - 1;
-
-    for (int j = left; j < right; ++j) 
-    {
-        if (ComparePairs()(pairs[j], pivot)) 
-        {
-            ++i;
-            std::swap(pairs[i], pairs[j]);
-        }
-    }
-    std::swap(pairs[i + 1], pairs[right]);
-    return i + 1;
-}
-
-std::deque<int>& ford_johnson_sort_deque(std::deque<int>& arr) 
-{
-    int n = arr.size();
-    int straggler = -1;
-    bool has_straggler = false;
-    if ((n & 1) != 0) 
-	{
-        has_straggler = true;
-        straggler = arr.back();
-        arr.pop_back();
-        n--;
-    }
-    std::deque<std::pair<int, int> > pairs;
-    for (int i = 0; i < n; i += 2)
-        pairs.push_back(std::make_pair(arr[i], arr[i + 1]));
-
     compare_pairs_avx_deque(pairs);
 	sort_pairs(pairs, 0, pairs.size() - 1);
     std::deque<int> S;
@@ -86,7 +115,6 @@ std::deque<int>& ford_johnson_sort_deque(std::deque<int>& arr)
         }
     }
 
-    arr.swap(S);
-    return arr;
+    return S;
 }
 

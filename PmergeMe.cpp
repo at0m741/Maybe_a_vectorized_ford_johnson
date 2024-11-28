@@ -2,34 +2,16 @@
 #include <xmmintrin.h>
 
 __attribute__((always_inline, cold))
-static inline void vectorized_copy(const std::vector<std::pair<int, int> >& pairs,
-                     std::vector<std::pair<int, int> >& leftArray,
-                     std::vector<std::pair<int, int> >& rightArray,
-                     int left, int middle, int n1, int n2) 
+static inline void copy_pairs(const std::vector<std::pair<int, int> >& pairs,
+                                   std::vector<std::pair<int, int> >& leftArray,
+                                   std::vector<std::pair<int, int> >& rightArray,
+                                   int left, int middle, int n1, int n2) 
 {
-    int i = 0;
-    for (; i + 4 <= n1; i += 4) {
-        __m256i firsts = _mm256_loadu_si256((__m256i*)&pairs[left + i].first);
-        __m256i seconds = _mm256_loadu_si256((__m256i*)&pairs[left + i].second);
-
-        _mm256_storeu_si256((__m256i*)&leftArray[i].first, firsts);
-        _mm256_storeu_si256((__m256i*)&leftArray[i].second, seconds);
-    }
-
-    for (; i < n1; ++i) {
+    for (int i = 0; i < n1; ++i) {
         leftArray[i] = pairs[left + i];
     }
 
-    int j = 0;
-    for (; j + 4 <= n2; j += 4) {
-        __m256i firsts = _mm256_loadu_si256((__m256i*)&pairs[middle + 1 + j].first);
-        __m256i seconds = _mm256_loadu_si256((__m256i*)&pairs[middle + 1 + j].second);
-
-        _mm256_storeu_si256((__m256i*)&rightArray[j].first, firsts);
-        _mm256_storeu_si256((__m256i*)&rightArray[j].second, seconds);
-    }
-
-    for (; j < n2; ++j) {
+    for (int j = 0; j < n2; ++j) {
         rightArray[j] = pairs[middle + 1 + j];
     }
 }
@@ -42,10 +24,10 @@ void merge_pairs(std::vector<std::pair<int, int> >& pairs, int left, int middle,
 
     std::vector<std::pair<int, int> > leftArray(n1);
     std::vector<std::pair<int, int> > rightArray(n2);
-	leftArray.reserve(n1);
-	rightArray.reserve(n2);
+	leftArray.resize(n1);
+	rightArray.resize(n2);
 
-    vectorized_copy(pairs, leftArray, rightArray, left, middle, n1, n2);
+    copy_pairs(pairs, leftArray, rightArray, left, middle, n1, n2);
 
     int i = 0, j = 0, k = left;
 

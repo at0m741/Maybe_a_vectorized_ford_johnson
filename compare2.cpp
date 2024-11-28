@@ -2,9 +2,8 @@
 
 void compare_pairs_avx_deque(std::deque<std::pair<int, int> >& pairs) 
 {
-size_t n = pairs.size();
-    check_alignment(&pairs[0], 32);
-    size_t block_size = 64;  // Tile size: number of bytes that fit into a cache line
+	size_t n = pairs.size();
+    size_t block_size = 64;  
 
     for (size_t block_start = 0; block_start < n; block_start += block_size) 
     {
@@ -37,7 +36,6 @@ size_t n = pairs.size();
             }
         }
 
-        // Handle the remaining elements in the block
         for (; i < block_end; ++i) 
         {
             int min_value = std::min(pairs[i].first, pairs[i].second);
