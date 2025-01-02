@@ -7,19 +7,16 @@ int main(int argc, char* argv[])
     std::vector<int> data;
     std::deque<int> data2;
 
-    if (argc <= 2 || !std::isdigit(argv[1][0]) || !std::isdigit(argv[2][0]))
-    {
+    if (argc <= 2 || !std::isdigit(argv[1][0]) || !std::isdigit(argv[2][0])){
         std::cout << "Usage: " << argv[0] << " <number1> <number2> ... <numberN>" << std::endl;
         std::cout << " " << std::endl;
         std::cout << "Example: " << argv[0] << " `shuf -i 1-N -n N | tr \"\\n\" \" \"`" << std::endl; 
         return 0;
     }
 
-    for (int i = 1; i < argc; ++i) 
-    {
+    for (int i = 1; i < argc; ++i) {
         std::string argument(argv[i]);
-        if (argument.empty()) 
-        {
+        if (argument.empty()) {
             std::cout << "Invalid argument: " << argument << std::endl;
             return 0;
         }
@@ -27,8 +24,7 @@ int main(int argc, char* argv[])
         data2.push_back(std::atoi(argument.c_str()));
     }
 
-    if (data.empty() || data2.empty()) 
-    {
+    if (data.empty() || data2.empty()) {
         std::cout << "Nothing to sort" << std::endl;
         return 0;
     }
@@ -37,8 +33,7 @@ int main(int argc, char* argv[])
     int straggler = -1;
     bool has_straggler = false;
 
-    if (n % 2 != 0) 
-    {
+    if (n % 2 != 0) {
         has_straggler = true;
         straggler = data.back();
         data.pop_back();

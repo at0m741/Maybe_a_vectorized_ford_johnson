@@ -1,7 +1,6 @@
 #include "PmergeMe.hpp"
 
-align static const uint64_t jacobsthal_table[] = 
-{
+align static const uint64_t jacobsthal_table[] = {
     0, 1 , 1, 3, 5, 11, 21, 43, 85, 171, 341, 683, 1365, 2731, 
     5461, 10923, 21845, 43691, 87381, 174763, 349525, 699051, 
     1398101, 2796203, 5592405, 11184811, 22369621, 44739243, 
@@ -15,24 +14,21 @@ align static const uint64_t jacobsthal_table[] =
     1537228672809129301, 3074457345618258603, 6148914691236517205
 };
 
-void calculate_jacobsthal_deque(std::deque<uint64_t>& jacobsthal, size_t start, size_t size) 
-{
+void calculate_jacobsthal_deque(std::deque<uint64_t>& jacobsthal, size_t start, size_t size) {
     if (start < 2) return;
 
     uint64_t prev2 = jacobsthal[start - 2];
     uint64_t prev1 = jacobsthal[start - 1];
     size_t i = start;
 
-    for (; i < size; ++i) 
-    {
+    for (; i < size; ++i) {
         jacobsthal[i] = prev1 + 2 * prev2;
         prev2 = prev1;
         prev1 = jacobsthal[i];
     }
 }
 
-std::deque<uint64_t> generate_jacobsthal_deque(size_t size) 
-{
+std::deque<uint64_t> generate_jacobsthal_deque(size_t size) {
     size_t static_size = sizeof(jacobsthal_table) / sizeof(jacobsthal_table[0]);
     std::deque<uint64_t> jacobsthal(size);
 

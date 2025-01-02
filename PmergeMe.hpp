@@ -23,6 +23,24 @@ struct ComparePairs
     }
 } align;
 
+__attribute__((always_inline))
+inline __m256i load_256(const void* ptr) {
+    if (!((uint64_t)ptr & 31)) {
+        return _mm256_load_si256((__m256i*)ptr);
+    } else {
+        return _mm256_loadu_si256((__m256i*)ptr);
+    }
+}
+
+__attribute__((always_inline))
+inline void store_256(void* ptr, __m256i data) {
+    if (!((uint64_t)ptr & 31)) {
+        _mm256_store_si256((__m256i*)ptr, data);
+    } else {
+        _mm256_storeu_si256((__m256i*)ptr, data);
+    }
+}
+
 void* check_alignment(void* ptr, std::size_t alignment);
 bool is_aligned_32(const void* ptr);
 void calculate_jacobsthal_avx(std::vector<uint64_t>& jacobsthal, size_t start, size_t size); 
