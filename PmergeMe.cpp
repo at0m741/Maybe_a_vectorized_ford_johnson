@@ -1,6 +1,7 @@
 #include "PmergeMe.hpp"
 #include <xmmintrin.h>
 
+
 __attribute__((always_inline, hot))
 static inline void copy_pairs(const std::vector<std::pair<int, int> >& pairs,
                               std::vector<std::pair<int, int> >& leftArray,
@@ -8,9 +9,6 @@ static inline void copy_pairs(const std::vector<std::pair<int, int> >& pairs,
                               int left, int middle, int n1, int n2) {
     int i = 0;
     for (; i + 3 < n1; i += 4) {
-        _mm_prefetch((const char*)&pairs[left + i + 4], _MM_HINT_T0);
-        _mm_prefetch((const char*)&leftArray[i + 4], _MM_HINT_T0);
-
         __m256i data = load_256(&pairs[left + i]);
         store_256(&leftArray[i], data);
     }
@@ -20,9 +18,6 @@ static inline void copy_pairs(const std::vector<std::pair<int, int> >& pairs,
 
     int j = 0;
     for (; j + 3 < n2; j += 4) {
-        _mm_prefetch((const char*)&pairs[middle + 1 + j + 4], _MM_HINT_T0);
-        _mm_prefetch((const char*)&rightArray[j + 4], _MM_HINT_T0);
-
         __m256i data = load_256(&pairs[middle + 1 + j]);
         store_256(&rightArray[j], data);
     }
@@ -40,42 +35,24 @@ static inline void merge_pairs(std::vector<std::pair<int, int> >& pairs, int lef
     std::vector<std::pair<int, int> > rightArray(n2);
 	leftArray.resize(n1);
 	rightArray.resize(n2);
-	leftArray.reserve(n1);
-	rightArray.reserve(n2);
 
     copy_pairs(pairs, leftArray, rightArray, left, middle, n1, n2);
     int i = 0, j = 0, k = left;
-
+	
 	while (i + 3 < n1 && j + 3 < n2) {
-		if (ComparePairs()(leftArray[i], rightArray[j]))
-			pairs[k++] = leftArray[i++];
-		else 
-			pairs[k++] = rightArray[j++];
-
-		if (ComparePairs()(leftArray[i], rightArray[j]))
-			pairs[k++] = leftArray[i++];
-		else
-			pairs[k++] = rightArray[j++];
-
-		if (ComparePairs()(leftArray[i], rightArray[j])) 
-			pairs[k++] = leftArray[i++];
-		else 
-			pairs[k++] = rightArray[j++];
-
-		if (ComparePairs()(leftArray[i], rightArray[j])) 
-			pairs[k++] = leftArray[i++];
-		else
-			pairs[k++] = rightArray[j++];
+		merge4_unrolled(pairs, leftArray, rightArray, i, j, k, ComparePairs());
 	}
 
 	while (i < n1 && j < n2) {
-		if (ComparePairs()(leftArray[i], rightArray[j])) 
-			pairs[k++] = leftArray[i++];
-		else
-			pairs[k++] = rightArray[j++];
+		bool c    = ComparePairs()(leftArray[i], rightArray[j]);
+		pairs[k]  = c ? leftArray[i] : rightArray[j];
+		i        += c ? 1 : 0;
+		j        += c ? 0 : 1;
+		++k;
 	}
 
 	while (i + 3 < n1) {
+		_mm_prefetch(&leftArray[i + 4], _MM_HINT_NTA);
 		pairs[k++] = leftArray[i++];
 		pairs[k++] = leftArray[i++];
 		pairs[k++] = leftArray[i++];
@@ -101,10 +78,8 @@ void sort_pairs(std::vector<std::pair<int, int> >& pairs, int left, int right) {
     const int threshold = 32;
     std::vector<std::pair<int, int> > leftBuffer((right - left + 1) / 2 + 1);
     std::vector<std::pair<int, int> > rightBuffer((right - left + 1) / 2 + 1);
-	leftBuffer.reserve((right - left + 1) / 2 + 1);
-	rightBuffer.reserve((right - left + 1) / 2 + 1);
 
-    if (right - left <= threshold) {
+    if (__builtin_expect(right - left < threshold, 1)) {
         std::sort(pairs.begin() + left, pairs.begin() + right + 1, ComparePairs());
         return;
     }
